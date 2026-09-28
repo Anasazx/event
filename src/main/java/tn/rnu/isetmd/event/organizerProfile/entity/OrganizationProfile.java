@@ -1,6 +1,5 @@
 package tn.rnu.isetmd.event.organizerProfile.entity;
 
-import tn.rnu.isetmd.event.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -14,16 +13,12 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "organizer_profiles")
-public class OrganizerProfile {
+@Table(name = "organization_profile")
+public class OrganizationProfile {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-
-    @OneToOne
-    @JoinColumn(name = "user_id", nullable = false, unique = true)
-    User user;
 
     @Column(nullable = false)
     String name;

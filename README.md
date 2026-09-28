@@ -8,7 +8,7 @@ Category
 TicketType
 Registration
 Review
-EventStaff
+OrganizerStaff
 Venue
 Notification
 

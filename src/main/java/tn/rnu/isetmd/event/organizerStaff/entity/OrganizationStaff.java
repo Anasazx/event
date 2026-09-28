@@ -1,7 +1,7 @@
-package tn.rnu.isetmd.event.eventStaff.entity;
+package tn.rnu.isetmd.event.organizerStaff.entity;
 
 import tn.rnu.isetmd.event.enums.StaffRole;
-import tn.rnu.isetmd.event.event.entity.Event;
+import tn.rnu.isetmd.event.organizerProfile.entity.OrganizationProfile;
 import tn.rnu.isetmd.event.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -18,18 +18,18 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Entity
 @Table(
-        name = "event_staff",
-        uniqueConstraints = {@UniqueConstraint(columnNames = {"event_id", "user_id"})}
+        name = "Organization_staff",
+        uniqueConstraints = {@UniqueConstraint(columnNames = {"Organization_profile_id", "user_id"})}
 )
-public class EventStaff {
+public class OrganizationStaff {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
     @ManyToOne
-    @JoinColumn(name = "event_id", nullable = false)
-    Event event;
+    @JoinColumn(name = "Organization_profile_id", nullable = false)
+    OrganizationProfile Organization;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

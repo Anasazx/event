@@ -3,7 +3,7 @@ package tn.rnu.isetmd.event.event.entity;
 
 import tn.rnu.isetmd.event.category.entity.Category;
 import tn.rnu.isetmd.event.enums.EventStatus;
-import tn.rnu.isetmd.event.organizerProfile.entity.OrganizerProfile;
+import tn.rnu.isetmd.event.organizerProfile.entity.OrganizationProfile;
 import tn.rnu.isetmd.event.venue.entity.Venue;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -59,7 +59,7 @@ public class Event {
 
     @ManyToOne
     @JoinColumn(name = "organizer_id", nullable = false)
-    OrganizerProfile organizer;
+    OrganizationProfile organizer;
 
     @CreationTimestamp
     LocalDateTime createdAt;

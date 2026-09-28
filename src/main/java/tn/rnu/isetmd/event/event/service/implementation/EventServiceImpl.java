@@ -12,7 +12,7 @@ import tn.rnu.isetmd.event.event.entity.Event;
 import tn.rnu.isetmd.event.event.mapper.EventMapper;
 import tn.rnu.isetmd.event.event.repository.EventRepository;
 import tn.rnu.isetmd.event.event.service.EventService;
-import tn.rnu.isetmd.event.organizerProfile.repository.OrganizerProfileRepository;
+import tn.rnu.isetmd.event.organizerProfile.repository.OrganizationProfileRepository;
 import tn.rnu.isetmd.event.venue.entity.Venue;
 import tn.rnu.isetmd.event.venue.repository.VenueRepository;
 
@@ -27,7 +27,7 @@ public class EventServiceImpl implements EventService {
 
     private final CategoryRepository categoryRepository;
     private final VenueRepository venueRepository;
-    private final OrganizerProfileRepository organizerProfileRepository;
+    private final OrganizationProfileRepository organizerProfileRepository;
 
     @Override
     public EventResponse createEvent(CreateEventRequest request) {
