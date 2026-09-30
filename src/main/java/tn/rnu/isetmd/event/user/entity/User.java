@@ -19,26 +19,28 @@ import java.time.LocalDateTime;
 @Table(name = "users")
 public class User {
 
+    public User(String firstName, String lastName, String email, String password) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.password = password;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    @Column
     String firstName;
 
-    @Column
     String lastName;
 
     @Column(unique = true)
     String email;
 
-    @Column
     String password;
 
-    @Column
-    UserRole role;
+    UserRole role =  UserRole.USER;
 
-    @Column
     String profileImage;
 
     @CreationTimestamp
