@@ -1,7 +1,8 @@
 package tn.rnu.isetmd.event.organizerStaff.entity;
 
+import tn.rnu.isetmd.event.enums.RequestStatus;
 import tn.rnu.isetmd.event.enums.StaffRole;
-import tn.rnu.isetmd.event.organizerProfile.entity.OrganizationProfile;
+import tn.rnu.isetmd.event.organizer.entity.Organization;
 import tn.rnu.isetmd.event.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -18,20 +19,30 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Entity
 @Table(
-        name = "Organization_staff",
-        uniqueConstraints = {@UniqueConstraint(columnNames = {"Organization_profile_id", "user_id"})}
+        name = "organization_staff",
+        uniqueConstraints = {@UniqueConstraint(columnNames = {"organization_id", "user_id"})}
 )
 public class OrganizationStaff {
+
+    public OrganizationStaff(
+            Organization organization,
+            User user,
+            StaffRole staffRole
+    ) {
+        this.organization = organization;
+        this.user = user;
+        this.role = staffRole;
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
     @ManyToOne
-    @JoinColumn(name = "Organization_profile_id", nullable = false)
-    OrganizationProfile Organization;
+    @JoinColumn(name = "organization_id", nullable = false)
+    Organization organization;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
     User user;
 
@@ -39,7 +50,13 @@ public class OrganizationStaff {
     @Column(nullable = false)
     StaffRole role;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    LocalDateTime addedAt;
+    RequestStatus status = RequestStatus.PENDING;
+
+    @Column(nullable = false)
+    LocalDateTime addedAt = LocalDateTime.now();
+
+
 
 }

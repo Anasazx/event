@@ -1,20 +1,23 @@
-package tn.rnu.isetmd.event.organizerProfile.entity;
+package tn.rnu.isetmd.event.organizer.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import tn.rnu.isetmd.event.organizerStaff.entity.OrganizationStaff;
+import tn.rnu.isetmd.event.user.entity.User;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "organization_profile")
-public class OrganizationProfile {
+@Table(name = "organization")
+public class Organization {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,6 +36,9 @@ public class OrganizationProfile {
     String phone;
 
     boolean verified = false;
+
+    @OneToMany(mappedBy = "organization")
+    List<OrganizationStaff> staff;
 
     @CreationTimestamp
     LocalDateTime createdAt;
