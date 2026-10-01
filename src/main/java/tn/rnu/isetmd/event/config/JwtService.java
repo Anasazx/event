@@ -1,4 +1,4 @@
-package tn.rnu.isetmd.event.service;
+package tn.rnu.isetmd.event.config;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -16,8 +16,13 @@ public class JwtService {
     private final SecretKey secretKey;
     private final long expiration;
 
-    public JwtService(@Value("${jwt.secret}") String secret, @Value("${jwt.expiration}") long expiration) {
-        this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+    public JwtService(
+            @Value("${jwt.secret}") String secret,
+            @Value("${jwt.expiration}") long expiration
+    ) {
+        this.secretKey = Keys.hmacShaKeyFor(
+                secret.getBytes(StandardCharsets.UTF_8)
+        );
         this.expiration = expiration;
     }
 
@@ -28,7 +33,7 @@ public class JwtService {
 
         return Jwts.builder()
                 .subject(email)
-                .claim("userId", userId)          // Custom claim for the Long ID
+                .claim("userId", userId)
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(secretKey)
@@ -39,8 +44,15 @@ public class JwtService {
         return extractAllClaims(token).getSubject();
     }
 
+
+
+    public Long extractUserId(String token) {
+        return extractAllClaims(token).get("userId", Long.class);
+    }
+
     public boolean isTokenValid(String token, String email) {
         String extractedEmail = extractEmail(token);
+
         return extractedEmail.equals(email)
                 && !isTokenExpired(token);
     }
@@ -58,5 +70,4 @@ public class JwtService {
                 .parseSignedClaims(token)
                 .getPayload();
     }
-
 }

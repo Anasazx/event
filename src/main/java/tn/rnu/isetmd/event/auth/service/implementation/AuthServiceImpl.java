@@ -6,7 +6,7 @@ import tn.rnu.isetmd.event.auth.dto.AuthResponse;
 import tn.rnu.isetmd.event.auth.dto.LoginRequest;
 import tn.rnu.isetmd.event.auth.dto.RegisterRequest;
 import tn.rnu.isetmd.event.auth.service.AuthService;
-import tn.rnu.isetmd.event.service.JwtService;
+import tn.rnu.isetmd.event.config.JwtService;
 import tn.rnu.isetmd.event.user.entity.User;
 import tn.rnu.isetmd.event.user.repository.UserRepository;
 

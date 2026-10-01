@@ -39,7 +39,7 @@ public class User {
 
     String password;
 
-    UserRole role =  UserRole.USER;
+    UserRole role = UserRole.USER;
 
     String profileImage;
 
