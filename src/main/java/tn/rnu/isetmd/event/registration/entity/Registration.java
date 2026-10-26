@@ -20,13 +20,14 @@ import java.time.LocalDateTime;
 @Entity
 @Table(
         name = "registrations",
-        uniqueConstraints = {@UniqueConstraint(columnNames = {"user_id", "event_id"})}
+        uniqueConstraints = {@UniqueConstraint(columnNames = {"user_id", "event_id"})},
+        indexes = @Index(name = "idx_registrations_event_status", columnList = "event_id, status")
 )
 public class Registration {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-     Long id;
+    Long id;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

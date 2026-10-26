@@ -4,6 +4,5 @@ public enum StaffRole {
     MODERATOR,
     ORGANIZER,
     CHECK_IN,
-    SECURITY,
     VOLUNTEER
 }

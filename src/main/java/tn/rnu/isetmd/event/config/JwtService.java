@@ -26,7 +26,7 @@ public class JwtService {
         this.expiration = expiration;
     }
 
-    public String generateToken(Long userId, String email) {
+    public String generateToken(Long userId, String email, String role) {
 
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expiration);
@@ -34,6 +34,7 @@ public class JwtService {
         return Jwts.builder()
                 .subject(email)
                 .claim("userId", userId)
+                .claim("role", role)
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(secretKey)
@@ -44,25 +45,18 @@ public class JwtService {
         return extractAllClaims(token).getSubject();
     }
 
-
-
     public Long extractUserId(String token) {
         return extractAllClaims(token).get("userId", Long.class);
     }
 
-    public boolean isTokenValid(String token, String email) {
-        String extractedEmail = extractEmail(token);
-
-        return extractedEmail.equals(email)
-                && !isTokenExpired(token);
+    public long getExpiration() {
+        return expiration;
     }
 
-    private boolean isTokenExpired(String token) {
-        return extractAllClaims(token)
-                .getExpiration()
-                .before(new Date());
-    }
-
+    /**
+     * Parsing verifies both the signature and the expiration date,
+     * an invalid or expired token throws a {@link io.jsonwebtoken.JwtException}.
+     */
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
                 .verifyWith(secretKey)

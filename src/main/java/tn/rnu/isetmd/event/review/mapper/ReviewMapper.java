@@ -9,10 +9,16 @@ public class ReviewMapper {
 
     public ReviewResponse toReviewResponse(Review review){
         return new ReviewResponse(
-                review.getUser().getFirstName(),
+                review.getId(),
+                review.getUser().getId(),
+                review.getUser().getFirstName() + " " + review.getUser().getLastName().charAt(0) + ".",
+                review.getUser().getProfileImage(),
+                review.getEvent().getId(),
+                review.getEvent().getTitle(),
                 review.getRating(),
                 review.getComment(),
-                review.getCreatedAt()
+                review.getCreatedAt(),
+                review.getUpdatedAt()
         );
     }
 

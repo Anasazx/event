@@ -6,9 +6,9 @@ import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import tn.rnu.isetmd.event.organizerStaff.entity.OrganizationStaff;
-import tn.rnu.isetmd.event.user.entity.User;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -35,10 +35,17 @@ public class Organization {
 
     String phone;
 
+    String email;
+
+    String address;
+
+    @Column(nullable = false)
     boolean verified = false;
 
-    @OneToMany(mappedBy = "organization")
-    List<OrganizationStaff> staff;
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @OneToMany(mappedBy = "organization", cascade = CascadeType.REMOVE)
+    List<OrganizationStaff> staff = new ArrayList<>();
 
     @CreationTimestamp
     LocalDateTime createdAt;

@@ -37,4 +37,7 @@ public class Venue {
 
     Integer capacity;
 
+    @Column(length = 1000)
+    String description;
+
 }

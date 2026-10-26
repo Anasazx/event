@@ -1,16 +1,21 @@
 package tn.rnu.isetmd.event.event.dto;
 
-import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import org.antlr.v4.runtime.misc.NotNull;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 import java.time.LocalDateTime;
 
+/**
+ * Dates are not required to be in the future here: an ongoing event can still be edited.
+ */
 public record UpdateEventRequest(
 
-        @NotBlank
+        @NotBlank @Size(max = 150)
         String title,
 
+        @Size(max = 5000)
         String description,
 
         String coverImage,
@@ -22,11 +27,9 @@ public record UpdateEventRequest(
         Long venueId,
 
         @NotNull
-        @Future
         LocalDateTime startDateTime,
 
         @NotNull
-        @Future
         LocalDateTime endDateTime,
 
         @NotNull

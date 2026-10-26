@@ -8,7 +8,6 @@ import java.util.List;
 
 public interface ReviewService {
 
-    List<ReviewResponse> getAllReviews();
     ReviewResponse getReviewById(Long id);
     List<ReviewResponse> getReviewsByEvent(Long eventId);
     List<ReviewResponse> getReviewsByUser(Long userId);

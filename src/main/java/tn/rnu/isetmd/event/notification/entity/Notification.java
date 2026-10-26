@@ -18,7 +18,10 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "notifications")
+@Table(
+        name = "notifications",
+        indexes = @Index(name = "idx_notifications_user", columnList = "user_id, is_read")
+)
 public class Notification {
 
     @Id
@@ -43,7 +46,7 @@ public class Notification {
     @Column(nullable = false)
     NotificationType type;
 
-    @Column(nullable = false)
+    @Column(name = "is_read", nullable = false)
     boolean read = false;
 
     @CreationTimestamp

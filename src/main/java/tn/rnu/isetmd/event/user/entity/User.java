@@ -6,6 +6,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -30,23 +31,39 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
+    @Column(nullable = false)
     String firstName;
 
+    @Column(nullable = false)
     String lastName;
 
-    @Column(unique = true)
+    @Column(nullable = false, unique = true)
     String email;
 
+    /**
+     * BCrypt hash, never the raw password
+     */
+    @ToString.Exclude
+    @Column(nullable = false)
     String password;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     UserRole role = UserRole.USER;
 
     String profileImage;
+
+    @Column(nullable = false)
+    boolean enabled = true;
 
     @CreationTimestamp
     LocalDateTime createdAt;
 
     @UpdateTimestamp
     LocalDateTime updatedAt;
+
+    public String getFullName() {
+        return firstName + " " + lastName;
+    }
 
 }
