@@ -9,6 +9,8 @@ public record OrganizationResponse(
    String website,
    String description,
    String logo,
+   String email,
+   String address,
    boolean verified,
    LocalDateTime createdAt
 ) {}

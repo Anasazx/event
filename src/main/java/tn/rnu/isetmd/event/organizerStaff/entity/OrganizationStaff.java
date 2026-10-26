@@ -27,11 +27,13 @@ public class OrganizationStaff {
     public OrganizationStaff(
             Organization organization,
             User user,
-            StaffRole staffRole
+            StaffRole staffRole,
+            RequestStatus status
     ) {
         this.organization = organization;
         this.user = user;
         this.role = staffRole;
+        this.status = status;
     }
 
     @Id
@@ -42,8 +44,11 @@ public class OrganizationStaff {
     @JoinColumn(name = "organization_id", nullable = false)
     Organization organization;
 
+    /**
+     * A user can belong to (or have a pending request for) a single organization
+     */
     @OneToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
     User user;
 
     @Enumerated(EnumType.STRING)
@@ -56,7 +61,5 @@ public class OrganizationStaff {
 
     @Column(nullable = false)
     LocalDateTime addedAt = LocalDateTime.now();
-
-
 
 }

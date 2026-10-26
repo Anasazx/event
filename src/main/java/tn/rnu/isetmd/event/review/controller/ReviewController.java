@@ -1,5 +1,6 @@
 package tn.rnu.isetmd.event.review.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,19 +14,12 @@ import tn.rnu.isetmd.event.review.service.ReviewService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/review")
+@RequestMapping("/api/reviews")
 @RequiredArgsConstructor
 public class ReviewController {
 
     private final ReviewService reviewService;
 
-    //This method is unnecessary
-    @GetMapping
-    public ResponseEntity<List<ReviewResponse>> getAllReviews() {
-        return ResponseEntity.ok(reviewService.getAllReviews());
-    }
-
-    //This method is unnecessary
     @GetMapping("/{id}")
     public ResponseEntity<ReviewResponse> getReviewById(@PathVariable Long id) {
         return ResponseEntity.ok(reviewService.getReviewById(id));
@@ -36,14 +30,14 @@ public class ReviewController {
         return ResponseEntity.ok(reviewService.getReviewsByEvent(eventId));
     }
 
-    @GetMapping("/user")
+    @GetMapping("/me")
     public ResponseEntity<List<ReviewResponse>> getReviewsByUser() {
         Long currentUserId = SecurityUtils.getCurrentUserId();
         return ResponseEntity.ok(reviewService.getReviewsByUser(currentUserId));
     }
 
     @PostMapping
-    public ResponseEntity<ReviewResponse> createReview(CreateReviewRequest request) {
+    public ResponseEntity<ReviewResponse> createReview(@Valid @RequestBody CreateReviewRequest request) {
 
         Long currentUserId = SecurityUtils.getCurrentUserId();
         ReviewResponse review = reviewService.createReview(currentUserId, request);
@@ -52,8 +46,10 @@ public class ReviewController {
                 .status(HttpStatus.CREATED)
                 .body(review);
     }
+
     @PutMapping("/{reviewId}")
-    public ResponseEntity<ReviewResponse> updateReview(@PathVariable Long reviewId, UpdateReviewRequest request) {
+    public ResponseEntity<ReviewResponse> updateReview(@PathVariable Long reviewId,
+                                                       @Valid @RequestBody UpdateReviewRequest request) {
 
         Long currentUserId = SecurityUtils.getCurrentUserId();
         ReviewResponse review = reviewService.updateReview(currentUserId, reviewId, request);
