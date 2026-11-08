@@ -1,0 +1,49 @@
+<app-page-header eyebrow="Places" title="Venues" subtitle="Where events take place, with capacity and location." />
+
+<div class="toolbar">
+  <div class="input-with-icon toolbar__grow">
+    <app-icon name="search" [size]="16" />
+    <input class="input" type="search" [formControl]="search" placeholder="Search venues by name or address" aria-label="Search venues" />
+  </div>
+</div>
+
+@if (cities().length) {
+  <div class="chip-row" aria-label="Filter by city">
+    @for (city of cities(); track city) {
+      <button type="button" class="chip" [class.is-active]="this.city() === city" (click)="selectCity(city)">{{ city }}</button>
+    }
+  </div>
+}
+
+@if (error()) {
+  <app-error-state [message]="error()!" (retry)="load()" />
+} @else if (all() === null) {
+  <div class="grid-venues"><app-skeleton variant="block" [count]="6" /></div>
+} @else if (visible().length === 0) {
+  <app-empty-state icon="map-pin" title="No venues found" message="Try another search or city." />
+} @else {
+  <div class="grid-venues">
+    @for (venue of visible(); track venue.id) {
+      <article class="card venue">
+        <header class="venue__head">
+          <span class="venue__icon"><app-icon name="map-pin" [size]="18" /></span>
+          <div>
+            <h2>{{ venue.name }}</h2>
+            <p class="muted">{{ venue.address }}, {{ venue.city }}, {{ venue.country }}</p>
+          </div>
+        </header>
+        @if (venue.description) {
+          <p class="venue__desc">{{ venue.description }}</p>
+        }
+        <footer class="venue__foot">
+          <span class="badge badge--neutral">
+            <app-icon name="users" [size]="12" /> {{ venue.capacity ? 'Up to ' + venue.capacity : 'Capacity not set' }}
+          </span>
+          @if (mapsLink(venue); as link) {
+            <a class="btn btn-ghost btn-sm" [href]="link" target="_blank" rel="noopener">Open map</a>
+          }
+        </footer>
+      </article>
+    }
+  </div>
+}

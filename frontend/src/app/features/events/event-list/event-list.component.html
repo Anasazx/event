@@ -1,0 +1,111 @@
+<app-page-header eyebrow="Discover" title="Events" subtitle="Search by keyword, category, city or date. Results update as you go and the URL keeps your search.">
+  <a class="btn btn-ghost btn-sm" routerLink="/venues"><app-icon name="map-pin" [size]="15" /> Venues</a>
+</app-page-header>
+
+<div class="catalog">
+  <aside class="catalog__filters card" [class.is-open]="filtersOpen()">
+    <div class="card-head">
+      <h2>Filters</h2>
+      @if (activeFilterCount() > 0) {
+        <span class="badge badge--primary">{{ activeFilterCount() }} active</span>
+      }
+    </div>
+
+    <form class="filters" [formGroup]="filters" (ngSubmit)="applyFilters()">
+      <div class="field">
+        <label for="f-keyword">Keyword</label>
+        <div class="input-with-icon">
+          <app-icon name="search" [size]="16" />
+          <input id="f-keyword" class="input" type="search" formControlName="keyword" placeholder="Title, description, organizer" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="f-category">Category</label>
+        <select id="f-category" class="select" formControlName="categoryId">
+          <option [ngValue]="null">All categories</option>
+          @for (category of categories(); track category.id) {
+            <option [ngValue]="category.id">{{ category.name }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="f-city">City</label>
+        <select id="f-city" class="select" formControlName="city">
+          <option value="">All cities</option>
+          @for (city of cities(); track city) {
+            <option [value]="city">{{ city }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="filters__dates">
+        <div class="field">
+          <label for="f-from">From</label>
+          <input id="f-from" class="input" type="date" formControlName="from" />
+        </div>
+        <div class="field">
+          <label for="f-to">To</label>
+          <input id="f-to" class="input" type="date" formControlName="to" />
+        </div>
+      </div>
+
+      <label class="check"><input type="checkbox" formControlName="freeOnly" /> Free events only</label>
+      <label class="check"><input type="checkbox" formControlName="includePast" /> Include past events</label>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-ghost btn-sm" (click)="resetFilters()">Reset</button>
+        <button type="submit" class="btn btn-primary btn-sm">Apply filters</button>
+      </div>
+    </form>
+  </aside>
+
+  <section class="catalog__results" aria-live="polite">
+    <div class="toolbar">
+      <button type="button" class="btn btn-ghost btn-sm filter-toggle" (click)="filtersOpen.set(!filtersOpen())" [attr.aria-expanded]="filtersOpen()">
+        <app-icon name="filter" [size]="15" /> Filters @if (activeFilterCount() > 0) {<span class="badge badge--primary">{{ activeFilterCount() }}</span>}
+      </button>
+      <div class="chips-scroll" aria-label="Quick category filter">
+        @for (category of categories(); track category.id) {
+          <button type="button" class="chip" [class.is-active]="categoryId() === category.id" (click)="toggleCategory(category.id)">
+            {{ category.name }}
+          </button>
+        }
+      </div>
+      <div class="toolbar__end">
+        <label class="check">
+          <input type="checkbox" [checked]="includePast()" (change)="setIncludePast($any($event.target).checked)" /> Past events
+        </label>
+        <select class="select sort" aria-label="Sort events" [value]="sort()" (change)="setSort($any($event.target).value)">
+          @for (option of sortOptions; track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    @if (results(); as page) {
+      <p class="muted results-count">
+        {{ page.totalElements }} event{{ page.totalElements === 1 ? '' : 's' }} found
+      </p>
+    }
+
+    @if (error()) {
+      <app-error-state [message]="error()!" (retry)="retry()" />
+    } @else if (results() === null || (loading() && results() === null)) {
+      <div class="grid-cards"><app-skeleton variant="card" [count]="pageSize" /></div>
+    } @else if (results()!.content.length === 0) {
+      <app-empty-state icon="search" title="No events match your search" message="Try a different keyword, clear a filter or widen the dates.">
+        <button type="button" class="btn btn-ghost" (click)="resetFilters()">Clear filters</button>
+      </app-empty-state>
+    } @else {
+      <div class="grid-cards" [class.is-loading]="loading()">
+        @for (event of results()!.content; track event.id) {
+          <app-event-card [event]="event" />
+        }
+      </div>
+      <app-pagination [page]="results()!.page" [totalPages]="results()!.totalPages" (pageChange)="goToPage($event)" />
+    }
+  </section>
+</div>

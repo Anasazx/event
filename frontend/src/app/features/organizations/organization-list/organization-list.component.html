@@ -1,0 +1,43 @@
+<app-page-header eyebrow="Community" title="Organizations" subtitle="Clubs, companies and collectives that host events on EventHub." />
+
+<div class="toolbar">
+  <div class="input-with-icon toolbar__grow">
+    <app-icon name="search" [size]="16" />
+    <input class="input" type="search" [formControl]="search" placeholder="Search by name or description" aria-label="Search organizations" />
+  </div>
+  <label class="check"><input type="checkbox" [formControl]="verifiedOnly" /> Verified only</label>
+</div>
+
+@if (error()) {
+  <app-error-state [message]="error()!" (retry)="load()" />
+} @else if (organizations() === null) {
+  <div class="grid-org"><app-skeleton variant="block" [count]="6" /></div>
+} @else if (organizations()!.length === 0) {
+  <app-empty-state icon="building" title="No organizations found" message="Try another search or remove the verified filter." />
+} @else {
+  <div class="grid-org">
+    @for (org of organizations(); track org.id) {
+      <a class="card org-card" [routerLink]="['/organizations', org.id]">
+        <span class="org-card__logo">
+          @if (org.logo) {
+            <img [src]="fileUrl(org.logo)" [alt]="org.name" />
+          } @else {
+            {{ org.name.charAt(0) }}
+          }
+        </span>
+        <div class="org-card__body">
+          <div class="row">
+            <strong class="org-card__name">{{ org.name }}</strong>
+            @if (org.verified) {
+              <app-badge tone="success"><app-icon name="check" [size]="12" /> Verified</app-badge>
+            }
+          </div>
+          <p class="muted org-card__desc">{{ org.description || 'No description yet.' }}</p>
+          @if (org.address) {
+            <small class="muted"><app-icon name="map-pin" [size]="12" /> {{ org.address }}</small>
+          }
+        </div>
+      </a>
+    }
+  </div>
+}

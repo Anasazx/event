@@ -1,0 +1,56 @@
+@if (notFound()) {
+  <app-empty-state icon="building" title="Organization not found" message="The link may be outdated or the organization was removed.">
+    <a class="btn btn-ghost" routerLink="/organizations">Browse organizations</a>
+  </app-empty-state>
+} @else if (error() && !organization()) {
+  <app-error-state [message]="error()!" (retry)="load(id())" />
+} @else if (organization() !== null) {
+  @let org = organization()!;
+  <section class="card org-hero">
+    <span class="org-hero__logo">
+      @if (org.logo) {
+        <img [src]="fileUrl(org.logo)" [alt]="org.name" />
+      } @else {
+        {{ org.name.charAt(0) }}
+      }
+    </span>
+    <div class="org-hero__body">
+      <div class="row">
+        <h1>{{ org.name }}</h1>
+        @if (org.verified) {
+          <app-badge tone="success"><app-icon name="check" [size]="12" /> Verified organizer</app-badge>
+        }
+      </div>
+      <p class="muted">{{ org.description || 'This organization has not added a description yet.' }}</p>
+      <dl class="contact">
+        @if (org.email) {
+          <dd><app-icon name="mail" [size]="14" /> <a [href]="'mailto:' + org.email">{{ org.email }}</a></dd>
+        }
+        @if (org.phone) {
+          <dd><app-icon name="phone" [size]="14" /> {{ org.phone }}</dd>
+        }
+        @if (org.website) {
+          <dd><app-icon name="globe" [size]="14" /> <a [href]="org.website" target="_blank" rel="noopener">{{ org.website }}</a></dd>
+        }
+        @if (org.address) {
+          <dd><app-icon name="map-pin" [size]="14" /> {{ org.address }}</dd>
+        }
+      </dl>
+    </div>
+  </section>
+
+  <section class="page-section">
+    <h2 class="section-title">Upcoming events</h2>
+    @if (upcoming() === null) {
+      <div class="grid-cards"><app-skeleton variant="card" [count]="3" /></div>
+    } @else if (upcoming()!.length === 0) {
+      <app-empty-state icon="calendar" title="No upcoming events" message="This organization has no published events at the moment." />
+    } @else {
+      <div class="grid-cards">
+        @for (event of upcoming(); track event.id) {
+          <app-event-card [event]="event" />
+        }
+      </div>
+    }
+  </section>
+}
