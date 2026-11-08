@@ -1,0 +1,72 @@
+<section class="hero">
+  <p class="hero__eyebrow">Conferences · Concerts · Workshops · Hackathons</p>
+  <h1>Find your next experience.</h1>
+  <p>Browse upcoming events across Tunisia, book your seat in a few clicks and enter with a QR code.</p>
+
+  <form class="hero__search" [formGroup]="search" (ngSubmit)="submit()" role="search">
+    <div class="input-with-icon">
+      <app-icon name="search" />
+      <input class="input" type="search" formControlName="keyword" placeholder="Search events, organizers or keywords" aria-label="Search events" />
+    </div>
+    <button type="submit" class="btn btn-lg hero__submit">Search events</button>
+  </form>
+</section>
+
+@if (categories(); as list) {
+  @if (list.length) {
+    <div class="chips-row" aria-label="Categories">
+      @for (category of list; track category.id) {
+        <a class="chip" [routerLink]="['/events']" [queryParams]="{ categoryId: category.id }">{{ category.name }}</a>
+      }
+    </div>
+  }
+}
+
+<section class="page-section">
+  <div class="row row--between section-head">
+    <h2 class="section-title">Coming up</h2>
+    <a routerLink="/events" class="link-more">Browse all <app-icon name="arrow-right" [size]="14" /></a>
+  </div>
+
+  @if (error()) {
+    <app-error-state [message]="error()!" (retry)="load()" />
+  } @else if (upcoming() === null) {
+    <div class="grid-cards"><app-skeleton variant="card" [count]="6" /></div>
+  } @else if (upcoming()!.length === 0) {
+    <app-empty-state icon="calendar" title="No upcoming events yet" message="New events are published regularly. Check back soon.">
+      <a class="btn btn-ghost" routerLink="/organizations">Explore organizations</a>
+    </app-empty-state>
+  } @else {
+    <div class="grid-cards">
+      @for (event of upcoming(); track event.id) {
+        <app-event-card [event]="event" />
+      }
+    </div>
+  }
+</section>
+
+@if (popular(); as list) {
+  @if (list.length) {
+    <section class="page-section">
+      <h2 class="section-title">Most popular</h2>
+      <div class="grid-cards">
+        @for (event of list; track event.id) {
+          <app-event-card [event]="event" />
+        }
+      </div>
+    </section>
+  }
+}
+
+@if (!auth.isAuthenticated()) {
+  <section class="cta card">
+    <div>
+      <h2>Organizing an event?</h2>
+      <p class="muted">Create your organization, publish events, sell tickets and check attendees in from one dashboard.</p>
+    </div>
+    <div class="row">
+      <a class="btn btn-primary" routerLink="/register">Get started</a>
+      <a class="btn btn-ghost" routerLink="/login">Sign in</a>
+    </div>
+  </section>
+}

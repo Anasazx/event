@@ -1,0 +1,102 @@
+.catalog {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.catalog__filters {
+  position: sticky;
+  top: calc(var(--topbar-height) + 1rem);
+}
+
+.filters {
+  display: grid;
+  gap: 1rem;
+  padding: 1.1rem 1.25rem 1.25rem;
+}
+
+.filters__dates {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.6rem;
+}
+
+/* Native date inputs have a large intrinsic width; allow them to shrink inside their column. */
+.filters__dates > * {
+  min-width: 0;
+}
+
+.filters__dates .input {
+  width: 100%;
+  min-width: 0;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.chips-scroll {
+  display: flex;
+  gap: 0.45rem;
+  overflow-x: auto;
+  max-width: 100%;
+  padding-bottom: 0.2rem;
+  scrollbar-width: thin;
+}
+
+.toolbar__end {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.filter-toggle {
+  display: none;
+}
+
+.sort {
+  width: auto;
+  min-width: 170px;
+}
+
+.results-count {
+  margin: 0.25rem 0 0.9rem;
+  font-size: 0.9rem;
+}
+
+.is-loading {
+  opacity: 0.6;
+  transition: opacity 0.15s ease;
+}
+
+@media (max-width: 960px) {
+  .catalog {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .catalog__filters {
+    position: static;
+    display: none;
+  }
+
+  .catalog__filters.is-open {
+    display: block;
+  }
+
+  .filter-toggle {
+    display: inline-flex;
+  }
+}

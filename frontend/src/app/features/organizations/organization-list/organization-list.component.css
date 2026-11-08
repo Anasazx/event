@@ -1,0 +1,61 @@
+.toolbar__grow {
+  flex: 1 1 280px;
+}
+
+.grid-org {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.org-card {
+  display: flex;
+  gap: 0.9rem;
+  padding: 1.1rem;
+  color: inherit;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.org-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  text-decoration: none;
+}
+
+.org-card__logo {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: var(--gradient-brand);
+  color: #fff;
+  font-size: 1.3rem;
+  font-weight: 700;
+  overflow: hidden;
+}
+
+.org-card__logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.org-card__body {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.org-card__name {
+  font-size: 1.02rem;
+}
+
+.org-card__desc {
+  font-size: 0.9rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

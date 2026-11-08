@@ -1,0 +1,228 @@
+@if (loading() && !event()) {
+  <div class="detail-grid">
+    <div class="stack">
+      <app-skeleton variant="block" />
+      <app-skeleton variant="line" [count]="4" />
+    </div>
+    <div class="card card-body"><app-skeleton variant="block" /></div>
+  </div>
+} @else if (notFound()) {
+  <app-empty-state icon="search" title="Event not found" message="This event may have been removed, or the link is incorrect.">
+    <a class="btn btn-ghost" routerLink="/events">Browse events</a>
+  </app-empty-state>
+} @else if (error() && !event()) {
+  <app-error-state [message]="error()!" (retry)="load(id())" />
+} @else if (event() !== null) {
+  @let e = event()!;
+  <div class="detail-grid">
+    <div class="stack">
+      <section class="card cover-card">
+        <div class="cover" [class.is-placeholder]="!cover(e)">
+          @if (cover(e); as src) {
+            <img [src]="src" [alt]="e.title" />
+          } @else {
+            <span>{{ e.title.charAt(0) }}</span>
+          }
+        </div>
+        <div class="card-body stack--tight">
+          <div class="row">
+            <app-badge tone="primary">{{ e.categoryName }}</app-badge>
+            @if (e.status !== 'PUBLISHED') {
+              <app-badge [tone]="statusTone(e.status)">{{ statusLabel(e.status) }}</app-badge>
+            }
+            @if (e.organizerVerified) {
+              <app-badge tone="success"><app-icon name="check" [size]="12" /> Verified organizer</app-badge>
+            }
+          </div>
+          <h1 class="event-title">{{ e.title }}</h1>
+          <div class="facts">
+            <span><app-icon name="calendar" [size]="16" /> {{ e.startDateTime | date: 'EEEE d MMMM y' }}</span>
+            <span><app-icon name="clock" [size]="16" /> {{ e.startDateTime | date: 'HH:mm' }} – {{ e.endDateTime | date: 'HH:mm' }}</span>
+            <span><app-icon name="map-pin" [size]="16" /> {{ e.venueName }}, {{ e.venueCity }}</span>
+            <span>
+              <app-icon name="building" [size]="16" />
+              <a [routerLink]="['/organizations', e.organizerId]">{{ e.organizerName }}</a>
+            </span>
+          </div>
+          @if (e.venueAddress) {
+            <p class="muted">{{ e.venueAddress }}</p>
+          }
+        </div>
+      </section>
+
+      @if (e.description) {
+        <section class="card card-body">
+          <h2 class="section-title">About this event</h2>
+          <p class="description">{{ e.description }}</p>
+        </section>
+      }
+
+      <section class="card card-body">
+        <div class="row row--between">
+          <h2 class="section-title">Reviews</h2>
+          @if (e.reviewCount > 0) {
+            <span class="rating-summary">
+              <app-star-rating [value]="e.averageRating" [size]="16" />
+              <strong>{{ e.averageRating | number: '1.1-1' }}</strong>
+              <span class="muted">({{ e.reviewCount }})</span>
+            </span>
+          }
+        </div>
+
+        @if (canReview()) {
+          <div class="review-cta">
+            <p class="muted">You attended this event. Share how it went.</p>
+            <button type="button" class="btn btn-primary btn-sm" (click)="openReview()">Write a review</button>
+          </div>
+        }
+
+        @if (reviews().length === 0) {
+          <p class="muted">No reviews yet.</p>
+        } @else {
+          <ul class="list reviews">
+            @for (review of reviews(); track review.id) {
+              <li class="review">
+                <div class="review__head">
+                  <span class="avatar avatar--sm">{{ review.username.charAt(0).toUpperCase() }}</span>
+                  <div class="review__who">
+                    <strong>{{ review.username }}</strong>
+                    <small class="muted">{{ review.createdAt | relativeTime }}</small>
+                  </div>
+                  <app-star-rating [value]="review.rating" [size]="14" />
+                  @if (auth.role() === 'ADMIN') {
+                    <button type="button" class="btn btn-ghost btn-sm" (click)="deleteReview(review)">Remove</button>
+                  }
+                </div>
+                @if (review.comment) {
+                  <p class="review__text">{{ review.comment }}</p>
+                }
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    </div>
+
+    <aside class="stack">
+      <section class="card card-body ticket-card">
+        @if (e.status === 'CANCELLED') {
+          <app-badge tone="danger">This event was cancelled</app-badge>
+        } @else if (e.status === 'COMPLETED' || (e.status !== 'DRAFT' && isInPast(e.endDateTime))) {
+          <p class="muted">This event has ended.</p>
+        }
+
+        <h2 class="section-title">Tickets</h2>
+
+        @if (myRegistration(); as reg) {
+          <div class="my-ticket" [class.is-cancelled]="reg.status === 'CANCELLED'">
+            <div class="row row--between">
+              <strong>Your registration</strong>
+              <app-badge [tone]="registrationTone(reg.status)">{{ registrationLabel(reg.status) }}</app-badge>
+            </div>
+            <p class="muted small-text">{{ reg.ticketTypeName }} · {{ reg.price | tnd: 'Free' }}</p>
+            @if (reg.status === 'PENDING') {
+              <p class="small-text">Your seat is reserved. Pay at the venue, then your ticket is confirmed.</p>
+            }
+            <div class="row">
+              <a class="btn btn-primary btn-sm" routerLink="/account/tickets">Show my QR code</a>
+              @if (reg.status === 'PENDING' || reg.status === 'CONFIRMED') {
+                <button type="button" class="btn btn-ghost btn-sm" (click)="cancelRegistration()">Cancel</button>
+              }
+            </div>
+          </div>
+        }
+
+        @if (tickets().length === 0) {
+          <p class="muted">Tickets are not on sale yet.</p>
+        } @else {
+          <div class="ticket-list" role="radiogroup" aria-label="Ticket types">
+            @for (ticket of tickets(); track ticket.id) {
+              <label
+                class="ticket"
+                [class.is-selected]="selectedTicket() === ticket.id"
+                [class.is-disabled]="!ticket.active || ticketSoldOut(ticket) || !canRegister()"
+              >
+                <input
+                  type="radio"
+                  name="ticket"
+                  [checked]="selectedTicket() === ticket.id"
+                  [disabled]="!ticket.active || ticketSoldOut(ticket) || !canRegister()"
+                  (change)="selectTicket(ticket.id)"
+                />
+                <span class="ticket__body">
+                  <span class="row row--between">
+                    <strong>{{ ticket.name }}</strong>
+                    <strong class="price">{{ ticket.price | tnd: 'Free' }}</strong>
+                  </span>
+                  @if (ticket.description) {
+                    <small class="muted">{{ ticket.description }}</small>
+                  }
+                  <small>
+                    @if (!ticket.active) {
+                      Not available
+                    } @else if (ticketSoldOut(ticket)) {
+                      Sold out
+                    } @else {
+                      {{ ticket.available }} left
+                    }
+                    @if (ticketWindowText(ticket); as window) {
+                      · {{ window }}
+                    }
+                  </small>
+                </span>
+              </label>
+            }
+          </div>
+
+          @if (!auth.isAuthenticated()) {
+            <a class="btn btn-primary btn-block" [routerLink]="['/login']" [queryParams]="{ returnUrl: '/events/' + e.id }">Sign in to register</a>
+          } @else if (canRegister()) {
+            <button type="button" class="btn btn-primary btn-block btn-lg" [disabled]="!selectedTicket() || registering()" (click)="register()">
+              @if (registering()) {
+                <span class="spinner" aria-hidden="true"></span> Registering…
+              } @else {
+                {{ selectedTicketInfo()?.price === 0 ? 'Get free ticket' : 'Reserve seat' }}
+              }
+            </button>
+            @if (selectedTicketInfo(); as t) {
+              @if (t.price > 0) {
+                <p class="hint center">Paid tickets are paid at the venue. The seat is reserved until then.</p>
+              }
+            }
+          } @else if (e.availableSeats === 0) {
+            <app-badge tone="warning">This event is full</app-badge>
+          }
+
+          <div class="capacity">
+            <div class="capacity__bar"><span [style.width.%]="e.capacity ? (e.registeredCount / e.capacity) * 100 : 0"></span></div>
+            <small class="muted">{{ e.availableSeats }} of {{ e.capacity }} seats available</small>
+          </div>
+        }
+
+        @if (isOwnOrganization()) {
+          <a class="btn btn-ghost btn-block" [routerLink]="['/organizer/events', e.id]">Manage this event</a>
+        }
+      </section>
+    </aside>
+  </div>
+
+  <app-modal [open]="reviewOpen()" title="Write a review" (closed)="reviewOpen.set(false)">
+    <form id="review-form" [formGroup]="reviewForm" (ngSubmit)="submitReview()" class="stack--tight">
+      <div class="field">
+        <label>Your rating</label>
+        <app-star-rating [value]="reviewForm.controls.rating.value" [size]="26" [interactive]="true" (valueChange)="reviewForm.controls.rating.setValue($event)" />
+      </div>
+      <div class="field">
+        <label for="comment">Comment <span class="muted">(optional)</span></label>
+        <textarea id="comment" class="textarea" formControlName="comment" rows="4" maxlength="2000" placeholder="What did you enjoy? What could be better?"></textarea>
+        <span class="hint">{{ reviewForm.controls.comment.value.length }}/2000</span>
+      </div>
+    </form>
+    <div modal-footer>
+      <button type="button" class="btn btn-ghost" (click)="reviewOpen.set(false)">Cancel</button>
+      <button type="submit" form="review-form" class="btn btn-primary" [disabled]="savingReview()">
+        {{ savingReview() ? 'Saving…' : 'Publish review' }}
+      </button>
+    </div>
+  </app-modal>
+}
