@@ -156,17 +156,21 @@ public class RegistrationServiceImpl implements RegistrationService {
         if (!Objects.equals(registration.getUser().getId(), userId)) {
             throw new NotFoundException("Registration not found");
         }
+
+        // Lock first, then re-read the status: two concurrent cancels must not both release a seat
+        Event event = lock(registration.getEvent());
+        entityManager.refresh(registration);
+
         if (registration.getStatus() == RegistrationStatus.CANCELLED) {
             throw new BadRequestException("This registration is already cancelled");
         }
         if (registration.getStatus() == RegistrationStatus.CHECKED_IN) {
             throw new BadRequestException("You already attended this event");
         }
-        if (!registration.getEvent().getStartDateTime().isAfter(LocalDateTime.now())) {
+        if (!event.getStartDateTime().isAfter(LocalDateTime.now())) {
             throw new BadRequestException("The event has already started");
         }
 
-        Event event = lock(registration.getEvent());
         TicketType ticketType = registration.getTicketType();
         entityManager.refresh(ticketType);
 

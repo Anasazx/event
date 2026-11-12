@@ -8,6 +8,7 @@ import tn.rnu.isetmd.event.auth.dto.AuthResponse;
 import tn.rnu.isetmd.event.auth.dto.LoginRequest;
 import tn.rnu.isetmd.event.auth.dto.RegisterRequest;
 import tn.rnu.isetmd.event.auth.service.AuthService;
+import tn.rnu.isetmd.event.auth.service.LoginAttemptService;
 import tn.rnu.isetmd.event.common.exception.ConflictException;
 import tn.rnu.isetmd.event.common.exception.ForbiddenException;
 import tn.rnu.isetmd.event.common.exception.UnauthorizedException;
@@ -27,15 +28,23 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
     private final NotificationService notificationService;
+    private final LoginAttemptService loginAttemptService;
 
     @Override
     @Transactional(readOnly = true)
     public AuthResponse login(LoginRequest loginRequest) {
 
+        String email = loginRequest.email().trim();
+        loginAttemptService.checkAllowed(email);
+
         // Same message for unknown email and wrong password, to avoid leaking which accounts exist
-        User user = userRepository.findByEmailIgnoreCase(loginRequest.email().trim())
+        User user = userRepository.findByEmailIgnoreCase(email)
                 .filter(found -> passwordEncoder.matches(loginRequest.password(), found.getPassword()))
-                .orElseThrow(() -> new UnauthorizedException("Invalid email or password"));
+                .orElseThrow(() -> {
+                    loginAttemptService.loginFailed(email);
+                    return new UnauthorizedException("Invalid email or password");
+                });
+        loginAttemptService.loginSucceeded(email);
 
         if (!user.isEnabled()) {
             throw new ForbiddenException("This account has been disabled");

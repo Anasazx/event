@@ -53,7 +53,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         // Authentication endpoints
-                        .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/register",
+                                "/api/auth/forgot-password", "/api/auth/reset-password").permitAll()
+                        // Container health check
+                        .requestMatchers(HttpMethod.GET, "/actuator/health").permitAll()
                         // Admin area
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         // Private reads that live under otherwise public paths

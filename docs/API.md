@@ -28,7 +28,9 @@ Paginated responses: `{ "content": [...], "page": 0, "size": 12, "totalElements"
 | Method | Path | Access | Body / params | Response |
 |---|---|---|---|---|
 | POST | `/api/auth/register` | Public | `{firstName, lastName, email, password (≥8)}` | `201 {token, expiresIn, user}` |
-| POST | `/api/auth/login` | Public | `{email, password}` | `200 {token, expiresIn, user}` · 401 wrong credentials · 403 disabled |
+| POST | `/api/auth/login` | Public | `{email, password}` | `200 {token, expiresIn, user}` · 401 wrong credentials · 403 disabled · 429 after 5 failures in 15 min |
+| POST | `/api/auth/forgot-password` | Public | `{email}` | `200 {message, demoLink}`: same message whether the account exists or not; `demoLink` only when `MAIL_DEMO_MODE=true` and the account exists (the e-mail itself is written to the server log) |
+| POST | `/api/auth/reset-password` | Public | `{token, newPassword (≥8)}` | `204` · 400 invalid, used or expired link (30 min, one use, only the latest link is valid) |
 | GET | `/api/auth/me` | User | | `UserResponse` |
 
 ## Users (current user)
@@ -142,6 +144,12 @@ Paginated responses: `{ "content": [...], "page": 0, "size": 12, "totalElements"
 | GET | `/api/admin/users` | Admin | `search?, role?, page, size` | `Page<UserResponse>` |
 | PATCH | `/api/admin/users/{id}/role` | Admin | `{role}` | `UserResponse` (not yourself) |
 | PATCH | `/api/admin/users/{id}/status` | Admin | `{enabled}` | `UserResponse` (not yourself) |
+
+## Health
+
+| Method | Path | Access | Response |
+|---|---|---|---|
+| GET | `/actuator/health` | Public | `{"status":"UP"}` (used by the docker-compose health check) |
 
 ## Files
 

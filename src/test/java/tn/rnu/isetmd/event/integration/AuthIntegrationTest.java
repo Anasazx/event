@@ -81,4 +81,30 @@ class AuthIntegrationTest extends ApiTestSupport {
         get("/api/categories", null).andExpect(status().isOk());
         get("/api/venues", null).andExpect(status().isOk());
     }
+
+    @Test
+    void repeatedFailedLoginsLockTheAccountTemporarily() throws Exception {
+        post("/api/auth/register", null, """
+                {"firstName":"A","lastName":"B","email":"brute@test.tn","password":"Password1"}
+                """).andExpect(status().isCreated());
+
+        String wrong = """
+                {"email":"brute@test.tn","password":"WrongPassword"}
+                """;
+        for (int i = 0; i < 5; i++) {
+            post("/api/auth/login", null, wrong).andExpect(status().isUnauthorized());
+        }
+
+        // Even the right password is refused while the lock is active
+        post("/api/auth/login", null, """
+                {"email":"brute@test.tn","password":"Password1"}
+                """)
+                .andExpect(status().isTooManyRequests())
+                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("Too many failed login attempts")));
+    }
+
+    @Test
+    void healthEndpointIsPublic() throws Exception {
+        get("/actuator/health", null).andExpect(status().isOk()).andExpect(jsonPath("$.status").value("UP"));
+    }
 }

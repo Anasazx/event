@@ -557,6 +557,8 @@ The `reminder_sent` flag makes the reminder job idempotent: restarting the API o
 | Tickets | QR payload is a 128-bit random identifier, not guessable and not derived from ids; it is only returned to its owner |
 | CORS | Allowed origins from `CORS_ORIGINS`; not needed in production (same origin through nginx) |
 | Login enumeration | Same message for unknown email and wrong password |
+| Password reset | 256-bit random token sent as a link; only its SHA-256 hash is stored (`password_reset_tokens`), valid 30 min, single use, a new request invalidates older links, success clears the login lock and notifies the user. `forgot-password` answers the same message for unknown emails. E-mails go through the `MailService` interface; the provided `ConsoleMailService` logs them (no SMTP server in this project), and demo mode returns the link to the UI |
+| Brute force | `LoginAttemptService`: after 5 failed logins for an email within 15 min, further attempts get **429** until the window expires (even with the right password); a successful login resets the counter. In memory, per instance |
 
 ---
 
@@ -640,8 +642,8 @@ The current design targets a university or regional platform (thousands of users
 | Very hot events (flash sales) | Replace the row lock by a conditional atomic update (`UPDATE … SET sold = sold + 1 WHERE sold < quantity`) or a Redis counter, and put bookings behind a queue. |
 | Notifications | Publish domain events (`RegistrationCreated`, `EventCancelled`…) to a message broker (RabbitMQ/Kafka); consumers send in-app, e-mail and push notifications, and the UI receives them over WebSocket/SSE instead of polling. |
 | Payments | Integrate a payment gateway (e.g. Konnect, Flouci, Stripe): `PENDING` registration → payment intent → webhook confirms. A reservation expiry job releases unpaid seats. |
-| Observability | Spring Boot Actuator health/metrics, Prometheus + Grafana, structured logs with request ids. |
-| Security hardening | Refresh tokens with rotation, rate limiting on `/api/auth/*`, e-mail verification and password reset, HTTPS everywhere (TLS at nginx). |
+| Observability | Actuator is in place with only `/actuator/health` exposed (docker-compose health check); add metrics, Prometheus + Grafana, structured logs with request ids. |
+| Security hardening | Refresh tokens with rotation, move the login-attempt counters to Redis when running several instances (and add per-IP limits), a real `MailService` (SMTP/SendGrid) with `MAIL_DEMO_MODE=false`, e-mail verification, HTTPS everywhere (TLS at nginx). |
 
 ---
 
@@ -654,4 +656,6 @@ The current design targets a university or regional platform (thousands of users
 | Concurrency | Script firing 40 parallel bookings on a 10-seat event against PostgreSQL | exactly 10 accepted |
 | End-to-end | Headless Chrome (Puppeteer) through the real UI | organizer creates and publishes an event with a ticket, a new user signs up and books, staff checks the ticket in (pending → confirm → duplicate refused) |
 
-Run the backend suite with `./mvnw test` (20 tests).
+| Frontend unit | Jasmine + Karma (headless Chrome) | pipes and helpers, API error messages, session storage in `AuthService`, route guards, `authInterceptor` (token header, logout on 401 but not on a wrong password) |
+
+Run the backend suite with `./mvnw test` (27 tests) and the frontend one with `npm run test:ci` (19 tests).

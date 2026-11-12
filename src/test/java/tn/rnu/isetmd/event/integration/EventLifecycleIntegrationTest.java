@@ -108,6 +108,8 @@ class EventLifecycleIntegrationTest extends ApiTestSupport {
         patch("/api/registrations/" + aliceRegistration + "/cancel", alice, null)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("CANCELLED"));
+        // A second cancel must not release the seat twice
+        patch("/api/registrations/" + aliceRegistration + "/cancel", alice, null).andExpect(status().isBadRequest());
         register(carol, ticketId).andExpect(status().isCreated());
 
         Event event = eventRepository.findById(eventId).orElseThrow();
